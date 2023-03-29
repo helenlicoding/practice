@@ -1,12 +1,56 @@
-import requests
-from bs4 import BeautifulSoup
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Taylor Swift Eras Tour Santa Clara</title>
 
-url = 'https://www.sephora.com/product/daisy-eau-de-toilette-P191854'
-response = requests.get(url)
-soup = BeautifulSoup(response.content, 'html.parser')
+</head>
+<body>
+<div id="table-container">
+    <h1>Taylor Swift Eras Tour</h1>
+    <h2>Santa Clara - July 28th, 2023 at 6:30PM</h2>
+    <table>
+        <tr>
+            <th>Time</th>
+            <th>Price</th>
+        </tr>
+        <tbody id="table-body">
+        </tbody>
+    </table>
+    <script>
+        function updateTimeRemaining() {
+            // Get the JSON data
+            fetch("ticket_prices_multiple.json")
+                .then(response => response.json())
+                .then(data => {
+                    // Update the table
+                    const tableBody = document.getElementById("table-body");
+                    tableBody.innerHTML = "";
+                    for (let i = 0; i < data.length; i++) {
+                        const row = document.createElement("tr");
 
-price_elements = soup.find_all('span', class_='css-0')
-prices = [float(e.text.replace('$', '')) for e in price_elements]
+                        // Format the time in PT
+                        const timeString = new Date(data[i].time * 1000)
+                            .toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
 
-lowest_price = min(prices)
-print(f'The lowest price for Marc Jacobs Daisy perfume is ${lowest_price:.2f}')
+                        const price = `$${data[i].price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+
+                        const timeCell = document.createElement("td");
+                        timeCell.textContent = timeString;
+                        row.appendChild(timeCell);
+
+                        const priceCell = document.createElement("td");
+                        priceCell.textContent = price;
+                        row.appendChild(priceCell);
+
+                        tableBody.appendChild(row);
+                    }
+                });
+        }
+
+        // Update the table every 5 seconds
+        setInterval(updateTimeRemaining, 5000);
+    </script>
+</div>
+</body>
+</html>
